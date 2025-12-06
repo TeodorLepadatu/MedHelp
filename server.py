@@ -3,10 +3,20 @@ import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 from openai import OpenAI
+from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
-# Make sure you set your key: export OPENAI_API_KEY="sk-..."
+load_dotenv("backend/sourceCode/.env")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-app = FastAPI(title="Pure AI Triage System")
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (change to ["http://localhost:4200"] for security later)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class TriageRequest(BaseModel):
