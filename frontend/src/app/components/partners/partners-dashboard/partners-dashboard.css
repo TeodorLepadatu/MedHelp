@@ -1,0 +1,153 @@
+/* Page Layout */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f0f2f5; /* Light grey background */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.header-content h1 {
+  font-size: 1.8rem;
+  color: #2c3e50; /* Partner Brand Color */
+  margin: 0;
+}
+
+.header-content p {
+  color: #7f8c8d;
+  margin: 5px 0 0 0;
+  font-size: 0.95rem;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+  color: white;
+}
+
+/* Cards Grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 35px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(44, 62, 80, 0.15);
+  border-color: #bdc3c7;
+}
+
+/* Icons */
+.icon-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.icon-wrapper svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Specific Icon Colors */
+.stats-icon {
+  background-color: #e0f2fe; /* Light Blue */
+  color: #0284c7;
+}
+
+.pred-icon {
+  background-color: #f3e8ff; /* Light Purple */
+  color: #9333ea;
+}
+
+/* Card Text */
+.card h2 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.card p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 25px 0;
+  flex-grow: 1; /* Pushes action link to bottom */
+}
+
+/* Action Link */
+.card-action {
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card:hover .card-action {
+  text-decoration: underline;
+  color: #34495e;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .header-content, .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

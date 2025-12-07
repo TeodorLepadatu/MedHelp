@@ -72,11 +72,34 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token'); // Or wherever you store it
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  registerPartner(partnerData: any): Observable<any> {
+    // Matches app.use('/partners', ...) in server.js
+    return this.http.post(`${this.apiUrl}/partners/register`, partnerData);
+  }
+
+  loginPartner(credentials: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/partners/login`, credentials);
+  }
+
+  getPartnerDashboard(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/partners/dashboard`, { headers: this.getAuthHeaders() });
+  }
+
   // THE TIMER
   private autoLogout(expirationDuration: number) {
     console.log(`Session timer started for ${expirationDuration}ms`);
     this.tokenTimer = setTimeout(() => {
       this.logout();
     }, expirationDuration);
+
+    
   }
 }

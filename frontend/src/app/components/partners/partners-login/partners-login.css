@@ -1,0 +1,143 @@
+/* Page Background */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+  background-image: radial-gradient(#dfe6e9 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+}
+
+/* Card Style */
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Header */
+.card-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.card-header h2 {
+  color: #2c3e50; /* Professional Dark Blue */
+  margin: 0 0 5px 0;
+  font-size: 1.8rem;
+}
+
+.card-header p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  box-sizing: border-box; /* Important for padding */
+}
+
+input:focus {
+  border-color: #2c3e50;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+input.invalid {
+  border-color: #e74c3c;
+  background-color: #fdf2f2;
+}
+
+/* Button */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background-color: #1a252f;
+}
+
+.login-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Footer Links */
+.footer-links {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  border-top: 1px solid #ecf0f1;
+  padding-top: 20px;
+}
+
+.footer-links a {
+  color: #2980b9;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.back-link a {
+  color: #95a5a6;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.back-link a:hover {
+  color: #34495e;
+  text-decoration: underline;
+}
+
+/* Error Alert */
+.error-alert {
+  background-color: #fde8e8;
+  color: #c0392b;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #fab1a0;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+}

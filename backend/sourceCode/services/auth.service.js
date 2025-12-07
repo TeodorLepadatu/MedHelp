@@ -71,6 +71,7 @@ const AuthService = {
             next();
         });
     },
+    
 }
 
 module.exports = AuthService;

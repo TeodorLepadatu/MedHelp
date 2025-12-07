@@ -2,8 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const DatabaseService = require('./services/database.service'); // Added 'const'
+
+const DatabaseService = require('./services/database.service'); 
 const userRoutes = require('./routes/user.routes');
+const partnerRoutes = require('./routes/partners.routes'); 
 
 const app = express();
 const port = 3000;
@@ -22,6 +24,7 @@ app.use((req, res, next) => {
 
 // --- 2. Routes ---
 app.use('/', userRoutes); 
+app.use('/partners', partnerRoutes);
 
 // Test Route
 app.get('/', (req, res) => {

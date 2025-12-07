@@ -1,0 +1,58 @@
+
+<div class="login-container">
+  <div class="login-card">
+    
+    <div class="card-header">
+      <h2>Partner Portal</h2>
+      <p>Secure access for medical institutions</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-alert">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      
+      <div class="form-group">
+        <label for="email">Institution Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="credentials.email" 
+          required 
+          email
+          placeholder="admin@hospital.org"
+          #emailInput="ngModel"
+          [class.invalid]="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="credentials.password" 
+          required 
+          placeholder="••••••••"
+        >
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="!loginForm.form.valid || isLoading">
+        {{ isLoading ? 'Authenticating...' : 'Access Dashboard' }}
+      </button>
+
+      <div class="footer-links">
+        <p>New institution?</p>
+        <a routerLink="/partners-register">Register here</a>
+      </div>
+      
+      <div class="back-link">
+        <a routerLink="/partners">← Back to Overview</a>
+      </div>
+
+    </form>
+  </div>
+</div>
