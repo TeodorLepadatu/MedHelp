@@ -184,3 +184,18 @@ input.invalid:focus, select.invalid:focus, textarea.invalid:focus {
   cursor: not-allowed;
   transform: none;
 }
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #888;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: #0056b3; /* Medical Blue to match theme */
+  text-decoration: none;
+}
