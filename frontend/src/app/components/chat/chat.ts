@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -35,7 +35,8 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   constructor(
     private triageService: TriageService,
     private authService: AuthService, // Inject Auth Service
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -87,7 +88,8 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   sendMessage() {
-    if (!this.newMessage.trim() || this.isDiagnosisComplete) return;
+    // Added check for 'isTyping' so you can't send twice at once
+    if (!this.newMessage.trim() || this.isDiagnosisComplete || this.isTyping) return;
 
     const textToSend = this.newMessage;
     this.newMessage = ''; 
@@ -100,16 +102,18 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
     this.isTyping = true;
 
-    // PASS THE USER ID HERE
     this.triageService.sendMessage(textToSend, this.currentConversationId, this.currentUserId).subscribe({
       next: (response) => {
-        this.isTyping = false;
+        this.isTyping = false; // Stop loading animation
         
         if (!this.currentConversationId && response.conversation_id) {
           this.currentConversationId = response.conversation_id;
         }
 
         this.handleAiResponse(response);
+        
+        // --- FIX: FORCE SCREEN UPDATE ---
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         this.isTyping = false;
@@ -119,10 +123,14 @@ export class ChatComponent implements OnInit, AfterViewChecked {
           text: "Connection error. Please try again.",
           timestamp: new Date().toISOString()
         });
+        
+        // --- FIX: FORCE SCREEN UPDATE ON ERROR TOO ---
+        this.cdr.detectChanges();
       }
     });
   }
 
+  
   private handleAiResponse(response: any) {
      // ... (Keep your existing handleAiResponse logic) ...
      // It acts purely on the visual side. The saving happened in the backend.
