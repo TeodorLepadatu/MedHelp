@@ -1,1 +1,63 @@
-<p>partners-statistics works!</p>
+<div class="stats-container">
+  
+  <header>
+    <h1>Global Disease Distribution</h1>
+    <p>Analyze current infection numbers across the MedHelp user base.</p>
+  </header>
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label>Country</label>
+      <select [(ngModel)]="selectedCountry">
+        <option value="All">All Countries</option>
+        <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Disease Name (Optional)</label>
+      <input 
+        type="text" 
+        [(ngModel)]="selectedDisease" 
+        placeholder="e.g. Flu, COVID, Gastritis"
+      >
+    </div>
+
+    <button class="search-btn" (click)="fetchStatistics()" [disabled]="isLoading">
+      {{ isLoading ? 'Loading...' : 'Update Stats' }}
+    </button>
+  </div>
+
+  <div class="results-area">
+    
+    <div class="summary-card">
+      <h3>Total Reported Cases</h3>
+      <div class="big-number">{{ totalCases }}</div>
+      <p class="subtitle">Based on current filters</p>
+    </div>
+
+    <div class="data-grid">
+      <div class="grid-header">
+        <span>Country</span>
+        <span>Cases Count</span>
+        <span>Status</span>
+      </div>
+
+      <div *ngIf="stats.length === 0 && !isLoading" class="no-data">
+        No records found matching your criteria.
+      </div>
+
+      <div *ngFor="let item of stats" class="grid-row">
+        <span class="country-name">
+          🌍 {{ item.country }}
+        </span>
+        <span class="case-count">{{ item.count }}</span>
+        <span class="trend-indicator">
+          <span class="dot" [class.high]="item.count > 10" [class.low]="item.count <= 10"></span>
+          {{ item.count > 10 ? 'High Activity' : 'Moderate' }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>

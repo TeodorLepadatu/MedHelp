@@ -191,7 +191,83 @@ const PartnersController = {
             console.error("Prediction Controller Error:", err);
             res.status(500).send({ error: 'Internal Server Error' });
         }
+    },
+
+
+    getStatistics: async (req, res) => {
+        try {
+            const { country, disease } = req.body;
+            
+            const collection = await DatabaseService.goToCollection('Users');
+
+            // Build Aggregation Pipeline
+            const pipeline = [
+                // 1. Unwind: Split the 'previous_conversations' array into individual documents
+                { $unwind: "$previous_conversations" },
+                
+                // 2. Filter: Keep only valid reports
+                { $match: { 
+                    "previous_conversations.final_diagnostic.most_probable_diagnostic": { $exists: true } 
+                }}
+            ];
+
+            // 3. Optional Filter: Disease (Case insensitive regex)
+            if (disease && disease.trim() !== '') {
+                pipeline.push({
+                    $match: {
+                        "previous_conversations.final_diagnostic.most_probable_diagnostic": { 
+                            $regex: disease, 
+                            $options: 'i' 
+                        }
+                    }
+                });
+            }
+
+            // 4. Optional Filter: Country (If not "All")
+            if (country && country !== 'All') {
+                pipeline.push({
+                    $match: { "country": country }
+                });
+            }
+
+            // 5. Group: Count occurrences per country
+            pipeline.push({
+                $group: {
+                    _id: "$country", // Group by user's country
+                    count: { $sum: 1 }
+                }
+            });
+
+            // 6. Project: Format output
+            pipeline.push({
+                $project: {
+                    _id: 0,
+                    country: "$_id",
+                    count: 1
+                }
+            });
+
+            const stats = await collection.aggregate(pipeline).toArray();
+
+            // Handle case where country might be missing/null in DB
+            const cleanStats = stats.map(s => ({
+                country: s.country || "Unknown Location",
+                count: s.count
+            }));
+
+            res.status(200).json({ success: true, data: cleanStats });
+
+        } catch (err) {
+            console.error("Statistics Error:", err);
+            res.status(500).send({ error: "Failed to fetch statistics" });
+        }
     }
+
+
+
+
+
+
 };
 
 module.exports = PartnersController;

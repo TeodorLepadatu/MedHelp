@@ -98,6 +98,15 @@ export class AuthService {
   return this.http.post(`${this.apiUrl}/partners/predict`, payload, { headers: this.getAuthHeaders() });
 }
 
+getPartnerStatistics(country: string, disease: string): Observable<any> {
+  // Use POST so we can send a body with filters easily
+  return this.http.post(
+    `${this.apiUrl}/partners/statistics`, 
+    { country, disease },
+    { headers: this.getAuthHeaders() }
+  );
+}
+
   // THE TIMER
   private autoLogout(expirationDuration: number) {
     console.log(`Session timer started for ${expirationDuration}ms`);

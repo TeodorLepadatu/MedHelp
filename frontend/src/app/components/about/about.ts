@@ -20,11 +20,6 @@ export class AboutComponent {
       description: 'We prioritize the integrity and reliability of our AI, continuously training it on verified medical knowledge to ensure the highest degree of accuracy.' 
     },
     { 
-      icon: '🛡️', 
-      title: 'Privacy & Security', 
-      description: 'Confidentiality is paramount. All user interactions and data are encrypted end-to-end, ensuring your health conversations remain absolutely private.' 
-    },
-    { 
       icon: '🤝', 
       title: 'Accessibility & Equity', 
       description: 'We strive to remove barriers to preliminary care, offering our service at a low cost or free of charge to underserved communities worldwide.' 

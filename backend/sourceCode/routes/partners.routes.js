@@ -14,5 +14,6 @@ router.post('/login', PartnersController.loginPartner);
 // Endpoint: GET /api/partners/dashboard
 router.get('/dashboard', PartnersController.getPartnerDashboard);
 router.post('/predict', PartnersController.generatePrediction);
+router.post('/statistics', PartnersController.getStatistics);
 
 module.exports = router;
