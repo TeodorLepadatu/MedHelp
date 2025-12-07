@@ -2,91 +2,141 @@ import requests
 import json
 import sys
 
-SERVER_URL = "http://127.0.0.1:8000/triage_step"
-MAX_QUESTIONS = 5
+SERVER_URL = "http://127.0.0.1:8000"
 TOP_K_OUTPUT = 3
+MAX_QUESTIONS = 10
 
+def ingest_mode():
+    print("\n--- Knowledge Ingestion Mode ---")
+    url = input("Enter a valid medical URL to ingest:\n> ").strip()
+    if not url: return
+    
+    print("⏳ Ingesting...")
+    try:
+        resp = requests.post(f"{SERVER_URL}/ingest_url", json={"url": url})
+        if resp.status_code == 200:
+            print(f"✅ Success: {resp.json().get('message')}")
+        else:
+            print(f"❌ Error: {resp.text}")
+    except Exception as e:
+        print(f"Connection Failed: {e}")
+
+def show_index_info():
+    try:
+        resp = requests.get(f"{SERVER_URL}/index_info")
+        data = resp.json()
+        print(f"\n📊 Current RAG Index Status:")
+        print(f"   - Total Text Chunks: {data.get('num_chunks')}")
+        print(f"   - FAISS Optimized: {data.get('has_faiss')}")
+    except Exception as e:
+        print(f"Could not fetch info: {e}")
 
 def serve_loop():
-    print("\n--- Medical Symptom Triage (Pure AI) ---")
+    print("\n" + "="*60)
+    print(" 🏥 MedHelp AI Triage + RAG ")
+    print("="*60)
+    print("Commands: /ingest (add data) | /info (check DB) | or just type symptoms.")
 
-    user_text = input("Describe your symptoms:\n> ").strip()
+    user_input = input("\nDescribe your symptoms (or command):\n> ").strip()
 
-    conversation_history = f"Patient initial complaint: {user_text}"
+    turn_counter = 1
+    
+    # Command Handling
+    if user_input.startswith("/ingest"):
+        ingest_mode()
+        return serve_loop()
+    elif user_input.startswith("/info"):
+        show_index_info()
+        return serve_loop()
+    
+    # Start Triage Session
+    current_conv_id = None # Start new chat
+    current_message = user_input
+    
+    while True:
+        print(f"\n🔄 Analyzing...")
 
-    # We use this variable to ensure we always have data for the final print
-    last_ai_content = {}
-
-    for qn in range(MAX_QUESTIONS):
-        print(f"\n... Analyzing (Round {qn + 1}) ...")
+        payload = {
+            "message": current_message,
+            "conversation_id": current_conv_id
+        }
 
         try:
-            payload = {"history": conversation_history}
-            resp = requests.post(SERVER_URL, json=payload)
+            resp = requests.post(f"{SERVER_URL}/chat_step", json=payload)
             data = resp.json()
 
             if "error" in data:
-                print(f"Error: {data['error']}")
+                print(f"Server Error: {data['error']}")
                 break
 
-            ai_content = json.loads(data["gpt_json"])
-            last_ai_content = ai_content
+            # Parse the inner JSON string containing the medical analysis
+            ai_data = json.loads(data["gpt_json"])
+            current_conv_id = data["conversation_id"]
 
-            # --- 1. DISPLAY CURRENT HYPOTHESES ---
-            candidates = ai_content.get("candidates", [])
-            candidates.sort(key=lambda x: x['probability'], reverse=True)
+            # --- 1. RAG Feedback ---
+            if ai_data.get("evidence_used"):
+                print(f"📚 RAG Evidence Used: YES")
+                print(f"   Reasoning: {ai_data.get('evidence_reasoning')}")
+                retrieved = ai_data.get("_retrieved", [])
+                if retrieved:
+                    print(f"   Sources: {', '.join([r['source_title'][:20] + '...' for r in retrieved])}")
+            else:
+                print("⚠️  No specific RAG evidence found/used for this step.")
 
-            print(f"\nTop Suspected Conditions:")
-            for item in candidates[:TOP_K_OUTPUT]:
-                print(f"  🔹 {item['condition']}: {item['probability']:.2f}")
+            # --- 2. Current Probabilities ---
+            candidates = ai_data.get("candidates", [])
+            if candidates:
+                print(f"\n🔍 Top Hypotheses:")
+                candidates.sort(key=lambda x: x['probability'], reverse=True)
+                for c in candidates[:TOP_K_OUTPUT]:
+                    print(f"   • {c['condition']}: {int(c['probability']*100)}%")
 
-            # --- 2. CHECK IF AI IS DONE ---
-            question = ai_content.get("next_question", "")
-            if question == "DIAGNOSIS_COMPLETE":
-                #print("\n(AI has enough information to conclude.)")
+            # --- 3. Check for Completion ---
+            next_q = ai_data.get("next_question", "")
+            
+            if next_q == "DIAGNOSIS_COMPLETE":
+                print("\n" + "="*60)
+                print(" 📋 FINAL REPORT")
+                print("="*60)
+                
+                # Re-display final candidates cleanly
+                print(f"{'CONDITION':<30} | CONFIDENCE")
+                print("-" * 45)
+                for c in candidates[:TOP_K_OUTPUT]:
+                    print(f"{c['condition']:<30} | {int(c['probability']*100)}%")
+                
+                print("\n💡 ADVICE:")
+                print(ai_data.get("top_recommendation"))
+            
+            
+                retrieved = ai_data.get("_retrieved", [])
+                if retrieved:
+                    print("\n📚 REFERENCE SOURCES:")
+                    print("-" * 45)
+                    for i, r in enumerate(retrieved, 1):
+                        title = r.get('source_title', 'Medical Source')
+                        url = r.get('url', '#')
+                        print(f"{i}. {title}")
+                        print(f"   🔗 {url}")
+                else:
+                    print("\n(No specific medical sources were cited for this diagnosis)")
+
                 break
-
-            # --- 3. ASK USER (WITH EXIT OPTION) ---
-            print(f"\nAI Question: {question}")
-
-            # UPDATED: Explicit instruction to type 'report'
-            ans = input("Answer (or type 'report' to finish immediately):\n> ").strip()
-
-            # UPDATED: Check for exit keywords
-            # If user types these, we BREAK the loop, which sends them to the "Final Report" section below.
-            if ans.lower() in ['report', 'done', 'stop', 'exit', 'quit', 'q']:
-                print("\n>> Stopping interview and generating report...")
+            
+            # --- 4. Next Question Loop ---
+            print(f"\n🤖 AI: {next_q}")
+            
+            ans = input("\nYour Answer (or 'exit'):\n> ").strip()
+            if ans.lower() in ['exit', 'quit', 'stop']:
                 break
-
-            conversation_history += f" | Question: {question} Answer: {ans}"
+            
+            
+            turn_counter += 1
+            current_message = ans
 
         except Exception as e:
-            print(f"Connection Error: {e}")
+            print(f"Client Exception: {e}")
             break
-
-    # === FINAL REPORT SECTION ===
-    # This runs whenever the loop finishes (either naturally or via 'break')
-    print("\n" + "=" * 60)
-    print(" 📋 FINAL MEDICAL ANALYSIS")
-    print("=" * 60)
-
-    if last_ai_content:
-        # 1. Probabilities Table
-        candidates = last_ai_content.get("candidates", [])
-        candidates.sort(key=lambda x: x['probability'], reverse=True)
-
-        print(f"{'CONDITION':<30} | {'CONFIDENCE':<10}")
-        print("-" * 45)
-        for item in candidates[:TOP_K_OUTPUT]:
-            print(f"{item['condition']:<30} | {int(item['probability'] * 100)}%")
-
-        # 2. Recommendation
-        print("-" * 60)
-        print(f"\nADVICE:\n> {last_ai_content.get('top_recommendation')}")
-        print("=" * 60)
-    else:
-        print("No analysis data available.")
-
 
 if __name__ == "__main__":
     serve_loop()

@@ -116,6 +116,18 @@ export class ChatComponent implements OnInit, AfterViewChecked {
       const aiData = JSON.parse(response.gpt_json);
       const nextQuestion = aiData.next_question;
 
+      // 1. FORMAT THE RAG EVIDENCE SECTION (Used in both Questions and Final Report)
+      let evidenceSection = "";
+      if (aiData.evidence_used && aiData._retrieved && aiData._retrieved.length > 0) {
+        evidenceSection += "\n\n📚 **MEDICAL SOURCES USED:**\n";
+        aiData._retrieved.forEach((doc: any, index: number) => {
+           // We create a simple text representation. 
+           // If you want clickable links, we'd need to change the HTML to support <a href>,
+           // but for now, we will display the URL text.
+           evidenceSection += `[${index + 1}] ${doc.source_title}\n   🔗 ${doc.url}\n`;
+        });
+      }
+
       if (nextQuestion === 'DIAGNOSIS_COMPLETE') {
         this.isDiagnosisComplete = true;
         
@@ -129,7 +141,11 @@ export class ChatComponent implements OnInit, AfterViewChecked {
             finalReport += `• ${c.condition} (${pct}%)\n`;
           });
         }
+        
         finalReport += `\n💡 **ADVICE:**\n${aiData.top_recommendation}`;
+        
+        // Append Evidence to Final Report
+        finalReport += evidenceSection;
 
         this.messages.push({
           sender: 'bot',
@@ -138,9 +154,16 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         });
 
       } else {
+        // It's a normal question, but we can still show evidence if the AI used it to ask the question
+        let questionText = nextQuestion;
+        if (evidenceSection) {
+            // Optional: You can uncomment this if you want to see sources during the questions too
+            // questionText += evidenceSection; 
+        }
+
         this.messages.push({
           sender: 'bot',
-          text: nextQuestion,
+          text: questionText,
           timestamp: new Date().toISOString()
         });
       }
