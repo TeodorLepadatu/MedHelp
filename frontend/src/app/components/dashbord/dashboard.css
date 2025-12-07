@@ -1,0 +1,173 @@
+/* Layout */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f5f7fb;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header-content h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.highlight {
+  color: #0056b3; /* Medical Blue */
+}
+
+.header-content p {
+  color: #666;
+  margin-top: 5px;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Grid Layout */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 86, 179, 0.1);
+  border-color: #e0e7ff;
+}
+
+/* Icons */
+.icon-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.icon-wrapper svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Icon Specific Colors */
+.chat-icon {
+  background-color: #e0e7ff; /* Light Blue */
+  color: #4f46e5;
+}
+
+.history-icon {
+  background-color: #d1fae5; /* Light Green */
+  color: #059669;
+}
+
+.stats-icon {
+  background-color: #fee2e2; /* Light Red */
+  color: #dc2626;
+}
+
+/* Text */
+.card h2 {
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+}
+
+.card p {
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  flex-grow: 1; /* Pushes the button down */
+}
+
+/* Action Link */
+.card-action {
+  font-weight: 600;
+  color: #0056b3;
+  font-size: 0.95rem;
+}
+
+.card:hover .card-action {
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .logout-btn {
+    align-self: flex-end;
+  }
+}
+
+.chat-icon {
+  background-color: #e0e7ff; /* Light Blue */
+  color: #4f46e5;
+}
+
+.history-icon {
+  background-color: #d1fae5; /* Light Green */
+  color: #059669;
+}
+
+.stats-icon {
+  background-color: #fee2e2; /* Light Red */
+  color: #dc2626;
+}
+
+/* NEW: Profile Icon Colors */
+.profile-icon {
+  background-color: #f1f5f9; /* Light Gray/Slate */
+  color: #334155; /* Dark Slate */
+}

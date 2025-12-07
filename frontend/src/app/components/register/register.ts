@@ -12,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
-  // 1. Define the User Object
+  // Updated User Object
   user = {
     firstName: '',
     lastName: '',
@@ -20,10 +20,16 @@ export class RegisterComponent {
     phoneNumber: '',
     address: '',
     dateOfBirth: '',
-    password: ''
+    password: '',
+    // New Fields
+    weight: null, // initialized as null for number inputs
+    height: null,
+    country: '',
+    sex: '', // Will map to a select dropdown
+    previousConditions: '',
+    familyConditions: ''
   };
 
-  // 2. Define the missing properties explicitly
   errorMessage: string = '';
   isLoading: boolean = false;
 
@@ -44,7 +50,6 @@ export class RegisterComponent {
         this.isLoading = false; 
         console.error('Registration failed', error);
 
-        // Handle different error structures
         if (error.error && error.error.message) {
           this.errorMessage = error.error.message;
         } else if (error.error && error.error.error) {

@@ -1,0 +1,70 @@
+
+<div class="dashboard-container">
+  
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>Hello, <span class="highlight">{{ userName }}</span></h1>
+      <p>How can MedHelp assist you today?</p>
+    </div>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </header>
+
+  <main class="cards-grid">
+    
+    <div class="card" routerLink="/chat">
+      <div class="icon-wrapper chat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+          <circle cx="12" cy="5" r="2"></circle>
+          <path d="M12 7v4"></path>
+          <line x1="8" y1="16" x2="8" y2="16"></line>
+          <line x1="16" y1="16" x2="16" y2="16"></line>
+        </svg>
+      </div>
+      <h2>Start Triage</h2>
+      <p>Chat with our AI assistant to analyze symptoms and get immediate advice.</p>
+      <span class="card-action">Start Chat &rarr;</span>
+    </div>
+
+    <div class="card" routerLink="/history">
+      <div class="icon-wrapper history-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          <path d="M9 14h6"></path>
+          <path d="M9 18h6"></path>
+          <path d="M9 10h6"></path>
+        </svg>
+      </div>
+      <h2>Medical History</h2>
+      <p>View your past reports, diagnoses, and recommended treatments.</p>
+      <span class="card-action">View Records &rarr;</span>
+    </div>
+    
+    <div class="card" routerLink="/statistics">
+      <div class="icon-wrapper stats-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+      </div>
+      <h2>Local Statistics</h2>
+      <p>Real-time data on infections and health trends in your area.</p>
+      <span class="card-action">View Data &rarr;</span>
+    </div>
+
+    <div class="card" routerLink="/profile">
+      <div class="icon-wrapper profile-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <h2>My Profile</h2>
+      <p>View, update, or edit your personal health information and account details.</p>
+      <span class="card-action">Go to Profile &rarr;</span>
+    </div>
+    
+  </main>
+</div>

@@ -10,6 +10,14 @@ const registerSchema = Joi.object({
     password: Joi.string().min(8).required(),
     address: Joi.string().required(),
     phoneNumber: Joi.string().pattern(/^[0-9]{10}$/).required(),
+    
+    // New Fields
+    weight: Joi.number().positive().required(),
+    height: Joi.number().positive().required(),
+    country: Joi.string().required(),
+    sex: Joi.string().valid('Male', 'Female', 'Other').required(),
+    previousConditions: Joi.string().allow('').optional(), // Allow empty string
+    familyConditions: Joi.string().allow('').optional()    // Allow empty string
 });
 
 const UserController = {
@@ -92,14 +100,10 @@ getUserProfile: async (req, res) => {
                 return res.status(401).send({ error: 'Invalid token' });
             }
 
-            console.log("👉 3. Token verified for:", decoded.email);
-
             const user = await AuthService.findUserByEmail(decoded.email);
             if (!user) return res.status(404).send({ error: 'User not found' });
 
-            // --- THE FIX: EVERYTHING IS A STRING ---
-            // We force String() on every single field. 
-            // This guarantees the result is just plain text, which cannot crash.
+            // --- UPDATE: Add new fields to safe response ---
             const safeUserProfile = {
                 _id: String(user._id),
                 email: String(user.email || ""),
@@ -107,13 +111,17 @@ getUserProfile: async (req, res) => {
                 lastName: String(user.lastName || ""),
                 phoneNumber: String(user.phoneNumber || ""),
                 address: String(user.address || ""),
-                // We convert dates to strings manually to prevent Date object crashes
                 dateOfBirth: String(user.dateOfBirth || ""), 
-                createdAt: String(user.createdAt || "")
+                createdAt: String(user.createdAt || ""),
+                
+                // New Fields (Safe Cast)
+                weight: String(user.weight || ""),
+                height: String(user.height || ""),
+                country: String(user.country || ""),
+                sex: String(user.sex || ""),
+                previousConditions: String(user.previousConditions || ""),
+                familyConditions: String(user.familyConditions || "")
             };
-            
-            // LOOK FOR THIS LOG IN YOUR TERMINAL
-            console.log("👉 6. FINAL SAFE CHECK - Sending:", safeUserProfile);
             
             return res.status(200).json(safeUserProfile);
 

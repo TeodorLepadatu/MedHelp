@@ -18,6 +18,7 @@ from pymongo import MongoClient
 
 MAX_QUESTIONS = 10
 
+
 # Optional FAISS for faster search
 try:
     import faiss
@@ -25,6 +26,11 @@ try:
 except ImportError:
     faiss = None
     _HAS_FAISS = False
+    
+    
+    
+    
+
 
 # 1. Setup & Config
 load_dotenv("backend/sourceCode/.env") # Keep your existing path
@@ -43,8 +49,10 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 # MongoDB Setup
 mongo_client = MongoClient(MONGO_URI)
-db = mongo_client["medical_triage_db"]
+db = mongo_client["MedHelp"]
 conversations_collection = db["Conversations"]
+users_collection = db["Users"] # <--- NEW: Reference to Users collection
+
 
 app = FastAPI()
 
@@ -80,6 +88,7 @@ TRUSTED_SITES = [
 class ChatRequest(BaseModel):
     message: str
     conversation_id: str | None = None
+    user_id: str | None = None
 
 class IngestRequest(BaseModel):
     url: str
@@ -478,6 +487,37 @@ RULES:
         # E. Determine Bot Response
         if ai_data.get("next_question") == "DIAGNOSIS_COMPLETE":
             bot_text = format_final_report(ai_data)
+            if req.user_id:
+                try:
+                    # 1. Sort candidates to find top 3
+                    candidates = sorted(ai_data.get("candidates", []), key=lambda x: x['probability'], reverse=True)
+                    
+                    # 2. Prepare the strings (handle cases where we might have fewer than 3)
+                    diag1 = candidates[0]['condition'] if len(candidates) > 0 else "Unknown"
+                    diag2 = candidates[1]['condition'] if len(candidates) > 1 else "None"
+                    diag3 = candidates[2]['condition'] if len(candidates) > 2 else "None"
+
+                    # 3. Create the object structure you requested
+                    report_entry = {
+                        "report_date": datetime.now().isoformat(),
+                        "final_diagnostic": {
+                            "most_probable_diagnostic": diag1,
+                            "second_most_probable": diag2,
+                            "third_most_probable": diag3
+                        },
+                        "recommendation": ai_data.get("top_recommendation", "") # Optional: Good to have
+                    }
+
+                    # 4. Push to MongoDB "Users" collection
+                    users_collection.update_one(
+                        {"_id": ObjectId(req.user_id)},
+                        {"$push": {"previous_conversations": report_entry}}
+                    )
+                    print(f"✅ Saved report to user {req.user_id}")
+
+                except Exception as db_err:
+                    print(f"❌ Error saving to user history: {db_err}")
+            # ---------------------------------------
         else:
             bot_text = ai_data.get("next_question")
 

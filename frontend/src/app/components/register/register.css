@@ -15,7 +15,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 86, 179, 0.1);
   width: 100%;
-  max-width: 600px; /* Wider for 2-column layout */
+  max-width: 600px;
 }
 
 /* Header Text */
@@ -25,7 +25,7 @@
 }
 
 .auth-header h2 {
-  color: #0056b3; /* Medical Blue */
+  color: #0056b3;
   margin-bottom: 0.5rem;
   font-size: 2rem;
 }
@@ -34,11 +34,18 @@
   color: #666;
 }
 
-/* Form Layout */
+/* --- LAYOUT UPDATES --- */
+
+/* Default 2-column layout */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+}
+
+/* NEW: 3-column layout for (Sex / Weight / Height) */
+.form-row.three-col {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .form-group {
@@ -54,15 +61,26 @@ label {
   margin-bottom: 0.5rem;
 }
 
-input {
+/* --- ELEMENT STYLING UPDATES --- */
+/* Updated to include select and textarea so they look identical to inputs */
+input, select, textarea {
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  width: 100%; /* Ensures they fill the column */
+  box-sizing: border-box; /* Prevents padding from breaking layout */
+  font-family: inherit; /* Ensures textareas use the same font */
 }
 
-input:focus {
+/* Specific fix for textareas to allow vertical resizing only */
+textarea {
+  resize: vertical;
+}
+
+/* Focus states for all inputs */
+input:focus, select:focus, textarea:focus {
   border-color: #00c4cc; /* Medical Teal */
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 196, 204, 0.1);
@@ -117,10 +135,11 @@ input:focus {
   text-decoration: underline;
 }
 
-/* Mobile Responsiveness */
+/* --- MOBILE RESPONSIVENESS UPDATES --- */
 @media (max-width: 500px) {
-  .form-row {
-    grid-template-columns: 1fr; /* Stack inputs on mobile */
+  /* Stack both standard rows and the new 3-col rows on mobile */
+  .form-row, .form-row.three-col {
+    grid-template-columns: 1fr; 
   }
 }
 
@@ -136,12 +155,12 @@ input:focus {
 }
 
 /* Invalid Input State */
-input.invalid {
+input.invalid, select.invalid, textarea.invalid {
   border-color: #dc2626;
   background-color: #fff5f5;
 }
 
-input.invalid:focus {
+input.invalid:focus, select.invalid:focus, textarea.invalid:focus {
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   border-color: #dc2626;
 }
@@ -160,7 +179,6 @@ input.invalid:focus {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Disable button style */
 .submit-btn:disabled {
   background: #cbd5e1;
   cursor: not-allowed;

@@ -10,21 +10,12 @@ export class TriageService {
 
   constructor(private http: HttpClient) { }
 
-  // Get list of all chats for the sidebar
-  getConversations(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/conversations`);
-  }
-
-  // Load history of a specific chat
-  getConversationDetails(id: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/conversations/${id}`);
-  }
-
-  // UPDATED: Note that this now points to "/chat_step", NOT "/triage_step"
-  sendMessage(message: string, conversationId: string | null): Observable<any> {
+  // Update this method to accept userId
+  sendMessage(message: string, conversationId: string | null, userId: string | null): Observable<any> {
     const payload = { 
       message: message, 
-      conversation_id: conversationId 
+      conversation_id: conversationId,
+      user_id: userId  // <--- Send this to Python
     };
     return this.http.post<any>(`${this.baseUrl}/chat_step`, payload);
   }

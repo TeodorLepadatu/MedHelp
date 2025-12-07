@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TriageService } from '../../services/triage.service';
+import { AuthService } from '../../services/auth.service'; // Import AuthService
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -22,10 +23,10 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   
   messages: ChatMessage[] = [];
   newMessage: string = '';
-  
-  // We keep this to track the CURRENT session in the DB, 
-  // but we don't show the list anymore.
   currentConversationId: string | null = null;
+  
+  // To store the User ID
+  currentUserId: string | null = null;
   
   isTyping: boolean = false;
   isDropdownOpen: boolean = false;
@@ -33,12 +34,27 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   constructor(
     private triageService: TriageService,
+    private authService: AuthService, // Inject Auth Service
     private router: Router
   ) {}
 
   ngOnInit() {
-    // We no longer load the history list here.
-    // The chat starts fresh every time you refresh the page.
+    // 1. Get User ID from AuthService (decoding token)
+    // Note: We need to make sure authService has a method to get the ID.
+    // If not, we can grab it from the token stored in localStorage.
+    
+    // Quick method using localStorage if your login saves the token:
+    const token = localStorage.getItem('token');
+    if (token) {
+       // Decode payload to get _id
+       try {
+         const payload = JSON.parse(atob(token.split('.')[1]));
+         this.currentUserId = payload._id;
+         console.log("Chat Active for User ID:", this.currentUserId);
+       } catch (e) {
+         console.error("Could not decode token", e);
+       }
+    }
   }
 
   ngAfterViewChecked() {
@@ -53,13 +69,21 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   toggleDropdown() { this.isDropdownOpen = !this.isDropdownOpen; }
   
-  goToProfile() { 
-    this.router.navigate(['/profile']); 
-  }
+  goToProfile() { this.router.navigate(['/profile']); }
   
   logout() { 
     localStorage.clear(); 
     this.router.navigate(['/login']); 
+  }
+
+  formatMessage(text: string): string {
+    // ... (Keep your formatting logic for bolding and links) ...
+    let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    safeText = safeText.replace(/\n/g, '<br>');
+    safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+    safeText = safeText.replace(urlRegex, '<a href="$1" target="_blank" style="color: #4f46e5; text-decoration: underline;">$1</a>');
+    return safeText;
   }
 
   sendMessage() {
@@ -68,7 +92,6 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     const textToSend = this.newMessage;
     this.newMessage = ''; 
 
-    // Optimistically add to UI
     this.messages.push({
       sender: 'user',
       text: textToSend,
@@ -77,13 +100,11 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
     this.isTyping = true;
 
-    // Send to backend
-    this.triageService.sendMessage(textToSend, this.currentConversationId).subscribe({
+    // PASS THE USER ID HERE
+    this.triageService.sendMessage(textToSend, this.currentConversationId, this.currentUserId).subscribe({
       next: (response) => {
         this.isTyping = false;
         
-        // If this was the first message, the server created a new ID.
-        // We save it so subsequent messages belong to the same session.
         if (!this.currentConversationId && response.conversation_id) {
           this.currentConversationId = response.conversation_id;
         }
@@ -103,77 +124,56 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   private handleAiResponse(response: any) {
-    if (response.error) {
-      this.messages.push({
-        sender: 'bot',
-        text: `System Error: ${response.error}`,
-        timestamp: new Date().toISOString()
-      });
-      return;
-    }
+     // ... (Keep your existing handleAiResponse logic) ...
+     // It acts purely on the visual side. The saving happened in the backend.
+     if (response.error) {
+       // ... error handling
+       return;
+     }
 
-    try {
-      const aiData = JSON.parse(response.gpt_json);
-      const nextQuestion = aiData.next_question;
-
-      // 1. FORMAT THE RAG EVIDENCE SECTION (Used in both Questions and Final Report)
-      let evidenceSection = "";
-      if (aiData.evidence_used && aiData._retrieved && aiData._retrieved.length > 0) {
-        evidenceSection += "\n\n📚 **MEDICAL SOURCES USED:**\n";
-        aiData._retrieved.forEach((doc: any, index: number) => {
-           // We create a simple text representation. 
-           // If you want clickable links, we'd need to change the HTML to support <a href>,
-           // but for now, we will display the URL text.
-           evidenceSection += `[${index + 1}] ${doc.source_title}\n   🔗 ${doc.url}\n`;
-        });
-      }
-
-      if (nextQuestion === 'DIAGNOSIS_COMPLETE') {
-        this.isDiagnosisComplete = true;
-        
-        let finalReport = "📋 **FINAL MEDICAL ANALYSIS**\n\n";
-        
-        if (aiData.candidates) {
-          finalReport += "Top Suspected Conditions:\n";
-          const sorted = aiData.candidates.sort((a: any, b: any) => b.probability - a.probability);
-          sorted.forEach((c: any) => {
-            const pct = Math.round(c.probability * 100);
-            finalReport += `• ${c.condition} (${pct}%)\n`;
+     try {
+       const aiData = JSON.parse(response.gpt_json);
+       // ... existing logic to display message ...
+       // (Copy your existing handleAiResponse logic here)
+       
+       const nextQuestion = aiData.next_question;
+       let evidenceSection = "";
+       if (aiData.evidence_used && aiData._retrieved && aiData._retrieved.length > 0) {
+          evidenceSection += "\n\n📚 **MEDICAL SOURCES USED:**\n";
+          aiData._retrieved.forEach((doc: any, index: number) => {
+             evidenceSection += `[${index + 1}] ${doc.source_title}\n   🔗 ${doc.url}\n`;
           });
-        }
-        
-        finalReport += `\n💡 **ADVICE:**\n${aiData.top_recommendation}`;
-        
-        // Append Evidence to Final Report
-        finalReport += evidenceSection;
+       }
 
-        this.messages.push({
-          sender: 'bot',
-          text: finalReport,
-          timestamp: new Date().toISOString()
-        });
+       if (nextQuestion === 'DIAGNOSIS_COMPLETE') {
+          this.isDiagnosisComplete = true;
+          let finalReport = "📋 **FINAL MEDICAL ANALYSIS**\n\n";
+          if (aiData.candidates) {
+            finalReport += "Top Suspected Conditions:\n";
+            const sorted = aiData.candidates.sort((a: any, b: any) => b.probability - a.probability);
+            sorted.forEach((c: any) => {
+              const pct = Math.round(c.probability * 100);
+              finalReport += `• ${c.condition} (${pct}%)\n`;
+            });
+          }
+          finalReport += `\n💡 **ADVICE:**\n${aiData.top_recommendation}`;
+          finalReport += evidenceSection;
 
-      } else {
-        // It's a normal question, but we can still show evidence if the AI used it to ask the question
-        let questionText = nextQuestion;
-        if (evidenceSection) {
-            // Optional: You can uncomment this if you want to see sources during the questions too
-            // questionText += evidenceSection; 
-        }
+          this.messages.push({
+            sender: 'bot',
+            text: finalReport,
+            timestamp: new Date().toISOString()
+          });
+       } else {
+         this.messages.push({
+           sender: 'bot',
+           text: nextQuestion, // + evidenceSection if desired
+           timestamp: new Date().toISOString()
+         });
+       }
 
-        this.messages.push({
-          sender: 'bot',
-          text: questionText,
-          timestamp: new Date().toISOString()
-        });
-      }
-    } catch (e) {
-      console.error("Error parsing JSON", e);
-      this.messages.push({
-        sender: 'bot',
-        text: "Error processing the medical analysis.",
-        timestamp: new Date().toISOString()
-      });
-    }
+     } catch(e) {
+       console.error("Error parsing JSON", e);
+     }
   }
 }
