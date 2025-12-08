@@ -12,4 +12,7 @@ import { RouterLink } from '@angular/router'; // <--- Essential for buttons to w
 })
 export class HomeComponent {
   // Logic for the home page goes here (if any)
+
+
+  //Test comment lmao
 }
